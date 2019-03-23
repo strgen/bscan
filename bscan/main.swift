@@ -1,47 +1,43 @@
-//
-//  main.swift
-//  bscan
-//
-//  Created by morfeusys on 20/08/14.
-//  Copyright (c) 2014 morfeusys. All rights reserved.
-//
-
 import Foundation
 import Cocoa
 import IOBluetooth
 
-var timeout = 10
+var timeout = 20
 var address = false
 var name = false
 
 class BlueDelegate : IOBluetoothDeviceInquiryDelegate {
     func deviceInquiryDeviceFound(sender: IOBluetoothDeviceInquiry!, device: IOBluetoothDevice!) {
         if (address) {
-            println(device.addressString + (name ? " " + device.name : ""))
+            print(device.addressString + (name ? " " + device.name : ""))
         } else if (name) {
-            println(device.name)
+            print(device.name)
         } else {
-            println(device.nameOrAddress)
+            print(device.nameOrAddress)
         }
     }
 }
 
-var args = Process.arguments
+
+var args = CommandLine.arguments
 if args.count > 1 {
-    for var i = 1; i < args.count; i++ {
+    var i = 0
+    while i < args.count{
         switch args[i] {
-        case "-t": if args.count > i+1 {let t = args[++i]; timeout = t.toInt()!}
+        case "-t": if args.count > i+1 { i = i + 1; let t = args[i]; timeout = Int(t)!}
         case "-a": address = true
         case "-n": name = true
         default:break
         }
+        i += 1
+
     }
 }
 
 var delegate = BlueDelegate()
 var inquiry = IOBluetoothDeviceInquiry(delegate: delegate)
-inquiry.updateNewDeviceNames = true
-if (inquiry.start() == kIOReturnSuccess) {
+inquiry?.updateNewDeviceNames = true
+if (inquiry?.start() == kIOReturnSuccess) {
     sleep(UInt32(timeout))
-    inquiry.stop()
+    inquiry?.stop()
 }
